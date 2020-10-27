@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AdvantagePlatform.Data;
 using AdvantagePlatform.Pages.Models;
+using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,11 +12,11 @@ namespace AdvantagePlatform.Pages.Tools
     public class DeleteModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfigurationDbContext _identityContext;
+        private readonly ConfigurationDbContext _identityContext;
 
         public DeleteModel(
             ApplicationDbContext context,
-            IConfigurationDbContext identityContext)
+            ConfigurationDbContext identityContext)
         {
             _context = context;
             _identityContext = identityContext;

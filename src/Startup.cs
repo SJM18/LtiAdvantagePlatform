@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using AdvantagePlatform.Data;
 using AdvantagePlatform.Utility;
+using DocumentFormat.OpenXml.EMMA;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -42,7 +45,7 @@ namespace AdvantagePlatform
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-			// This is a sample app. Use simple passwords.
+            // This is a sample app. Use simple passwords.
             services.AddDefaultIdentity<AdvantagePlatformUser>(options =>
                 {
                     options.Password.RequireDigit = false;
@@ -57,21 +60,21 @@ namespace AdvantagePlatform
             // on localhost at the same time.
             services.ConfigureApplicationCookie(options => { options.Cookie.Name = "AdvantagePlatform"; });
 
-			// Some pages require authorization.
-            services.AddMvc()
+            // Some pages require authorization.
+            services.AddMvc(options => options.EnableEndpointRouting = false)
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeFolder("/CourseLinks"); })
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeFolder("/PlatformLinks"); })
                 .AddRazorPagesOptions(options => { options.Conventions.AuthorizeFolder("/Tools"); })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             // Add Swagger tools using Swashbuckle.AspNetCore
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title= "Advantage Platform", 
+                    Title = "Advantage Platform",
                     Version = Assembly.GetEntryAssembly().GetName().Version.ToString(),
-                    Description = "These are the LTI Advantage service endpoints implemented by this sample platform. " 
+                    Description = "These are the LTI Advantage service endpoints implemented by this sample platform. "
                                   + "Click on Authorize and login with the username and password you registered to try the various services."
                 });
 
@@ -84,24 +87,35 @@ namespace AdvantagePlatform
                 options.SwaggerGeneratorOptions.DocumentFilters = new List<IDocumentFilter>
                     {new HideRubyRoutesInSwaggerFilter()};
 
+
+                var oauthScheme = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        Password = new OpenApiOAuthFlow
+                        {
+                            TokenUrl = new Uri("/connect/token", UriKind.Relative),
+                            Scopes = Config.LtiScopes.ToDictionary(s => s, s => ""),
+                        }
+                    },
+                    Description = "Balea Server OpenId Security Scheme"
+                };
+
                 // All the controllers in this sample platform require authorization. This 
                 // SecurityDefinition will use validate the user is registered, then request
                 // an access token from the TokenUrl.
-                options.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                options.AddSecurityDefinition("oauth2", oauthScheme);
+
+                OpenApiSecurityRequirement securityRequirements = new OpenApiSecurityRequirement()
                 {
-                    TokenUrl = "/connect/token",
-                    Type = "oauth2",
-                    Flow = "password",
-                    Scopes = Config.LtiScopes.ToDictionary(s => s, s => "")
-                });
+                    { oauthScheme,  Config.LtiScopes.ToList() },
+                };
 
                 // All the controllers in this sample require specific scopes. This 
                 // SecurityRequirement will allow the user to select the scopes they
                 // want to test with.
-                options.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                {
-                    { "oauth2", Config.LtiScopes }
-                });
+                options.AddSecurityRequirement(securityRequirements);
             });
 
             // Add Identity Server configured to support LTI Advantage needs
@@ -175,7 +189,7 @@ namespace AdvantagePlatform
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-			// Configure Identity Server
+            // Configure Identity Server
             InitializeDatabase(app);
 
             if (env.IsDevelopment())
@@ -193,7 +207,7 @@ namespace AdvantagePlatform
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-			// Fire up Identity Server (replaces app.UseAuthentication())
+            // Fire up Identity Server (replaces app.UseAuthentication())
             app.UseIdentityServer();
 
             // Fire up Swagger and Swagger UI

@@ -5,6 +5,7 @@ using AdvantagePlatform.Data;
 using AdvantagePlatform.Pages.Models;
 using AdvantagePlatform.Utility;
 using IdentityModel;
+using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
@@ -17,14 +18,14 @@ namespace AdvantagePlatform.Pages.Tools
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfigurationDbContext _identityConfig;
+        private readonly ConfigurationDbContext _identityConfig;
 
         [BindProperty]
         public ToolModel Tool { get; set; }
 
         public CreateModel(
             ApplicationDbContext context,
-            IConfigurationDbContext identityConfig)
+            ConfigurationDbContext identityConfig)
         {
             _context = context;
             _identityConfig = identityConfig;

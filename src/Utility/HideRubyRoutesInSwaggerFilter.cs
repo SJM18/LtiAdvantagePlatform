@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -10,7 +11,7 @@ namespace AdvantagePlatform.Utility
     /// </summary>
     public class HideRubyRoutesInSwaggerFilter : IDocumentFilter
     {
-        public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
+        public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
             foreach (var key in swaggerDoc.Paths.Keys.ToArray())
             {
