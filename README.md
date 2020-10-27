@@ -2,7 +2,7 @@
 
 # LTI Advantage Platform
 
-Sample LTI Advantage Platform using .NET Core 2.1. So that it has a purpose (other than as a reference code sample), you can use it to [test](https://advantageplatform.azurewebsites.net/) LTI 1.3 Tools. There is a sample LTI Advantage Tool project over [here](https://github.com/andyfmiller/LtiAdvantageTool).
+Sample LTI Advantage Platform using .NET Core 3.1. There is a sample LTI Advantage Tool project over [here](https://github.com/andyfmiller/LtiAdvantageTool).
 
 ## Supported Features
 
