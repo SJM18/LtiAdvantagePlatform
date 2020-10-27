@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AdvantagePlatform.Data;
 using AdvantagePlatform.Pages.Models;
 using AdvantagePlatform.Utility;
+using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Interfaces;
 using LtiAdvantage.IdentityServer4;
@@ -17,11 +18,11 @@ namespace AdvantagePlatform.Pages.Tools
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfigurationDbContext _identityContext;
+        private readonly ConfigurationDbContext _identityContext;
 
         public EditModel(
             ApplicationDbContext context,
-            IConfigurationDbContext identityContext)
+            ConfigurationDbContext identityContext)
         {
             _context = context;
             _identityContext = identityContext;
